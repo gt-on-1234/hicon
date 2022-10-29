@@ -1,0 +1,16 @@
+name: hicon-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+
+  # test dependencies
+  - pytest>=6.0
+
+  # required dependencies
+  - setuptools
+
+#  - pip:
+#      - jupyterlite==0.1.0b12
+#      - sphinx-toggleprompt
