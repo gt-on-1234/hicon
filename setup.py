@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='hicon',
-    version='0.1.0',    
+    version='0.1.1',
     description='Create, use, edit and manage hierarchical configurations files with Python.',
     url='https://github.com/gt-on-1234/hicon',
     author='Oscar Nuki',
@@ -12,3 +12,4 @@ setup(
     install_requires=[],
     classifiers=[],
 )
+
