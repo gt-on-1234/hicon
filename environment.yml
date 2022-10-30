@@ -7,9 +7,14 @@ dependencies:
 
   # test dependencies
   - pytest>=6.0
+  - pytest-cov
 
   # required dependencies
   - setuptools
+  - black
+
+  # optional dependencies
+  - jupyterlab
 
 #  - pip:
 #      - jupyterlite==0.1.0b12
