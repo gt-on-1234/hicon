@@ -1,0 +1,1 @@
+HICON_JSON_FILE_SUFFIX = ".hc.json"

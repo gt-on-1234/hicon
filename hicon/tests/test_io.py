@@ -44,7 +44,7 @@ def test_read_json_files(temp_directory):
         "c": paths[1],
     }
 
-    config, sources = read_json_files(*paths)
+    config, sources = read_json_files(paths)
 
     assert config == expected_config
     assert sources == expected_sources
