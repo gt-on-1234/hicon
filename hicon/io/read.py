@@ -4,17 +4,12 @@ import typing as ty
 import json
 from pathlib import Path
 
-from hicon.core.typing import DecoderArgType, PathArgType
+from hicon.core.typing import PathArgType
 
 
-def read_json_file(
-    path: PathArgType, decoder: DecoderArgType = None
-) -> dict[str, ty.Any]:
-    if decoder is None:
-        decoder = json.JSONDecoder
-
+def read_json_file(path: PathArgType) -> dict[str, ty.Any]:
     with open(str(path)) as file:
-        data = json.load(file, cls=decoder)
+        data = json.load(file)
 
     if isinstance(data, str):
         data = json.loads(data)
@@ -23,13 +18,13 @@ def read_json_file(
 
 
 def read_json_files(
-    *paths: PathArgType, decoder: DecoderArgType = None
+    paths: list[PathArgType],
 ) -> tuple[dict[str, ty.Any], dict[str, Path]]:
     data = {}
     sources = {}
 
     for path in paths:
-        new_data = read_json_file(path, decoder=decoder)
+        new_data = read_json_file(path)
 
         for key, value in new_data.items():
             data[key] = value
