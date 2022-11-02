@@ -17,7 +17,9 @@ def write_json_files(data: dict[str, ty.Any], sources: dict[str, PathArgType]) -
 
     for source in unique_sources:
         source_data = {
-            key: data[key] for key in sources if Path(sources[key]) == source
+            key: data[key]
+            for key in sources
+            if Path(sources[key]) == source and key in data
         }
 
         write_json_file(source_data, source)
