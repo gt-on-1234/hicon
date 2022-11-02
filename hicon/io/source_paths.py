@@ -22,7 +22,7 @@ def iter_source_paths(path: ty.Optional[PathArgType] = None) -> ty.Generator[Pat
         dir_source_paths = glob.glob(str(search_dir / ("*" + HICON_JSON_FILE_SUFFIX)))
 
         for source_path in dir_source_paths:
-            yield source_path
+            yield Path(source_path)
 
 
 def get_source_paths(path: ty.Optional[PathArgType] = None) -> list[Path]:

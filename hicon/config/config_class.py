@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing as ty
 
-from dataclasses import asdict, fields, dataclass
+from dataclasses import asdict, dataclass, Field
 
 from hicon.core.constants import HICON_JSON_FILE_SUFFIX
 
@@ -33,16 +33,18 @@ class _ConfigFieldType(ty.Protocol):
     encoder: FieldEncoderType
     decoder: FieldDecoderType
 
+    @classmethod
+    def from_field(cls, field: Field) -> _ConfigFieldType:
+        ...
 
-# def _set_new_attribute(cls: ty.Type, name: str, value: ty.Any) -> None:
-#     if not hasattr(cls, name):
-#         setattr(cls, name, value)
+
+# Value is set automatically in hicon/__init__.py to
+# decouple from the config_field.py module itself.
+config_field_type: _ConfigFieldType
 
 
-def config_class(
-    cls: ty.Optional[ty.Type] = None,
-    /,
-    *,
+def _process_class(
+    cls: ty.Type = None,
     init: bool = True,
     repr: bool = True,
     eq: bool = True,
@@ -70,9 +72,12 @@ def config_class(
         source_paths = source_path_getter(path)
         data, field_sources = multi_file_reader(source_paths)
 
-        for key, field in cls_.__dataclass_fields__.items():
+        for key_, field_ in cls_.__dataclass_fields__.items():
+            if key_ not in data:
+                continue
+
             if isinstance(field, _ConfigFieldType):
-                data[key] = field.decoder(data[key])
+                data[key_] = field_.decoder(data[key_])
 
         instance = cls_(**data)
         instance.field_sources = field_sources
@@ -80,11 +85,14 @@ def config_class(
         return instance
 
     def update_source_files(self) -> None:
-        data = asdict(self)
+        data = vars(self)
 
-        for key, field in self.__dataclass_fields__.items():
-            if isinstance(field, _ConfigFieldType):
-                data[key] = field.encoder(data[key])
+        for key_, field_ in self.__dataclass_fields__.items():
+            if key_ not in data:
+                continue
+
+            if isinstance(field_, _ConfigFieldType):
+                data[key_] = field_.encoder(data[key_])
 
         multi_file_writer(data, self.field_sources)
 
@@ -109,6 +117,10 @@ def config_class(
     )
 
     data_class = data_class_wrapper(cls)
+    data_class_fields = data_class.__dataclass_fields__
+
+    for key, field in data_class_fields.items():
+        data_class_fields[key] = config_field_type.from_field(field)
 
     if not hasattr(data_class, "FILE_SUFFIX"):
         data_class.FILE_SUFFIX = file_suffix
@@ -123,3 +135,45 @@ def config_class(
         data_class.__setattr__ = __setattr__
 
     return data_class
+
+
+def config_class(
+    cls: ty.Optional[ty.Type] = None,
+    /,
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    match_args: bool = True,
+    kw_only: bool = False,
+    slots: bool = False,
+    file_suffix: str = HICON_JSON_FILE_SUFFIX,
+    multi_file_reader: ty.Optional[MultiFileReaderType] = None,
+    multi_file_writer: ty.Optional[MultiFileWriterType] = None,
+    source_path_getter: ty.Optional[SourcePathGetterType] = None,
+):
+    def wrapper(cls_) -> ty.Type:
+        return _process_class(
+            cls=cls_,
+            init=init,
+            repr=repr,
+            eq=eq,
+            order=order,
+            unsafe_hash=unsafe_hash,
+            frozen=frozen,
+            match_args=match_args,
+            kw_only=kw_only,
+            slots=slots,
+            file_suffix=file_suffix,
+            multi_file_reader=multi_file_reader,
+            multi_file_writer=multi_file_writer,
+            source_path_getter=source_path_getter,
+        )
+
+    if cls is None:
+        return wrapper
+
+    return wrapper(cls)

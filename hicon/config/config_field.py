@@ -53,6 +53,25 @@ class ConfigField(Field):
         self.encoder: FieldEncoderType = encoder
         self.decoder: FieldDecoderType = decoder
 
+    @classmethod
+    def from_field(cls, field: Field) -> ConfigField:
+        if isinstance(field, cls):
+            return field
+
+        return cls(
+            default=field.default,
+            default_factory=field.default_factory,
+            init=field.init,
+            repr=field.repr,
+            hash=field.hash,
+            compare=field.compare,
+            metadata=dict(field.metadata),
+            kw_only=field.kw_only,
+            parser=defaults.field_parser,
+            encoder=defaults.field_encoder,
+            decoder=defaults.field_decoder,
+        )
+
 
 def config_field(
     *,

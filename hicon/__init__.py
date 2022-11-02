@@ -41,18 +41,19 @@ defaults = Defaults(
 )
 
 
-def _use_hicon_defaults() -> None:
+def _use_hicon_modules() -> None:
     """Update the settings in the required modules"""
     from .config import config_class as config_class_module
 
     config_class_module.defaults = defaults
+    config_class_module.config_field_type = ConfigField
 
     from .config import config_field as config_field_module
 
     config_field_module.defaults = defaults
 
 
-_use_hicon_defaults()
+_use_hicon_modules()
 
 __all__ = [
     "constants",

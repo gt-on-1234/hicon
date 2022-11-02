@@ -4,7 +4,13 @@ import typing as ty
 import json
 from pathlib import Path
 
-from hicon.io import read_json_file, read_json_files, write_json_file, write_json_files
+from hicon.io import (
+    read_json_file,
+    read_json_files,
+    write_json_file,
+    write_json_files,
+    get_source_paths,
+)
 
 
 def test_read_json_file(temp_directory, data_with_all_dtypes):
@@ -80,3 +86,25 @@ def test_write_json_files(temp_directory):
     assert read_json_file(sources["a"]) == {"a": 9}
     assert read_json_file(sources["b"]) == {"b": [2]}
     assert read_json_file(sources["c"]) == {"c": "Hello", "d": "World"}
+
+
+def test_get_source_paths(temp_directory, data_with_all_dtypes):
+    temp_dir_path = Path(temp_directory.name)
+
+    paths = [
+        temp_dir_path / "test1.hc.json",
+        temp_dir_path / "folder/test2.hc.json",
+        temp_dir_path / "folder/folder/test3.hc.json",
+    ]
+
+    for path in paths:
+        if not path.parent.exists():
+            path.parent.mkdir()
+
+        write_json_file({}, path)
+
+    assert (
+        get_source_paths(temp_dir_path / "folder/folder/file.txt")
+        == get_source_paths(temp_dir_path / "folder/folder")
+        == paths
+    )
